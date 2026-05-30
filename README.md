@@ -23,31 +23,38 @@
 - 本机默认 Whistle 实例使用 `127.0.0.1:8899`。
 - 已安装 `w2`，支持 Homebrew、常见 npm global 路径、`command -v w2` 和 npm prefix 查找。
 
-## 构建和运行
+## 构建打包
 
 ```bash
-./script/build_and_run.sh
+./script/package_app.sh
 ```
 
 脚本会：
 
-1. 停止已运行的 `whistle-menubar` 进程。
-2. 执行 `swift build --product whistle-menubar`。
-3. 生成 `dist/whistle-menubar.app`。
-4. 写入包含 `LSUIElement = true` 的 `Info.plist`。
-5. 使用 `open -n` 启动菜单栏 App。
+1. 执行 release 构建：`swift build -c release --product whistle-menubar`。
+2. 生成可拷贝的 `dist/whistle-menubar.app`。
+3. 写入包含 `LSUIElement = true` 的 `Info.plist`。
+4. 复制本地化资源。
+5. 默认执行 ad-hoc codesign 并验证 bundle 结构。
 
-验证启动：
-
-```bash
-./script/build_and_run.sh --verify
-```
-
-查看运行日志：
+可选参数：
 
 ```bash
-./script/build_and_run.sh --logs
+./script/package_app.sh --configuration debug
+./script/package_app.sh --unsigned
 ```
+
+没有 Developer ID 签名时，默认 ad-hoc sign 只能保证 bundle 签名结构完整；如果文件通过会附加 quarantine 的方式传到另一台机器，macOS Gatekeeper 仍可能要求用户手动允许运行或使用正式签名/公证。
+
+## 本机运行调试
+
+```bash
+./script/run_app.sh
+./script/run_app.sh --verify
+./script/run_app.sh --logs
+```
+
+`script/build_and_run.sh` 仅保留为兼容入口，内部会转到 `script/package_app.sh`，不会启动 App。
 
 ## 自动测试
 

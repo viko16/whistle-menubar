@@ -6,6 +6,11 @@ name = "whistle-menubar"
 script = ""
 
 [[actions]]
-name = "Run"
+name = "Build Package"
+icon = "build"
+command = "./script/package_app.sh"
+
+[[actions]]
+name = "Run Local"
 icon = "run"
-command = "./script/build_and_run.sh"
+command = "./script/run_app.sh"
