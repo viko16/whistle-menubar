@@ -2,6 +2,7 @@
 set -euo pipefail
 
 APP_NAME="whistle-menubar"
+APP_DISPLAY_NAME="Whistle Menubar"
 PRODUCT_NAME="whistle-menubar"
 BUNDLE_ID="com.viko16.whistle-menubar"
 MIN_SYSTEM_VERSION="14.0"
@@ -117,8 +118,10 @@ done < <(/usr/bin/find "$ROOT_DIR/.build" -maxdepth 8 -type d \( -name 'WhistleM
   <string>AppIcon</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
+  <key>CFBundleDisplayName</key>
+  <string>$APP_DISPLAY_NAME</string>
   <key>CFBundleName</key>
-  <string>$APP_NAME</string>
+  <string>$APP_DISPLAY_NAME</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
