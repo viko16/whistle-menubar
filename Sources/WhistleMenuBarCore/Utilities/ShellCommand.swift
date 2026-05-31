@@ -131,7 +131,7 @@ public final class ShellCommand: CommandRunning {
             components.append(contentsOf: existing.split(separator: ":").map(String.init))
         }
 
-        components.append(contentsOf: userToolPaths())
+        components.append(contentsOf: userToolPaths)
         components.append(contentsOf: defaultPATH.split(separator: ":").map(String.init))
 
         var seen = Set<String>()
@@ -147,7 +147,7 @@ public final class ShellCommand: CommandRunning {
             .joined(separator: ":")
     }
 
-    private static func userToolPaths() -> [String] {
+    private static let userToolPaths: [String] = {
         let home = FileManager.default.homeDirectoryForCurrentUser
         var paths = [
             home.appendingPathComponent(".npm-global/bin").path,
@@ -173,7 +173,7 @@ public final class ShellCommand: CommandRunning {
             var isDirectory: ObjCBool = false
             return FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory) && isDirectory.boolValue
         }
-    }
+    }()
 
     private static func versionedNodeBins(under baseURL: URL, suffix: String) -> [String] {
         guard let versions = try? FileManager.default.contentsOfDirectory(

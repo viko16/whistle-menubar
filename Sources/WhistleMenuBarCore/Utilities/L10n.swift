@@ -9,7 +9,7 @@ public enum L10n {
         String(format: string(key), locale: Locale.current, arguments: arguments)
     }
 
-    private static var localizationBundle: Bundle {
+    private static let localizationBundle: Bundle = {
         let packagedCandidates: [Bundle?] = [
             Bundle.main,
             Bundle.main.resourceURL.flatMap {
@@ -28,7 +28,7 @@ public enum L10n {
         }
 
         return Bundle.module
-    }
+    }()
 
     private static func firstLocalizedBundle(in candidates: [Bundle?]) -> Bundle? {
         return candidates.compactMap { $0 }.first { bundle in
