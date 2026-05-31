@@ -3,6 +3,8 @@ import WhistleMenuBarCore
 
 @MainActor
 final class MenuBuilder {
+    private static let emptyStateImage = NSImage(size: NSSize(width: 18, height: 18))
+
     func rebuild(_ menu: NSMenu, state: AppState, target: StatusBarController) {
         menu.removeAllItems()
         menu.autoenablesItems = false
@@ -58,6 +60,7 @@ final class MenuBuilder {
             item.representedObject = RuleMenuPayload(rule: rule)
             item.isEnabled = !rule.isGroup
             item.state = (!rule.isGroup && rule.isSelected) ? .on : .off
+            reserveStateColumn(for: item)
             menu.addItem(item)
         }
     }
@@ -71,6 +74,7 @@ final class MenuBuilder {
         item.target = target
         item.isEnabled = state.canToggleProxy
         item.state = state.proxyState == .enabled ? .on : .off
+        reserveStateColumn(for: item)
         menu.addItem(item)
     }
 
@@ -83,6 +87,7 @@ final class MenuBuilder {
         item.target = target
         item.isEnabled = true
         item.state = state.launchAtLoginEnabled ? .on : .off
+        reserveStateColumn(for: item)
         menu.addItem(item)
     }
 
@@ -115,6 +120,10 @@ final class MenuBuilder {
         let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
         item.isEnabled = false
         return item
+    }
+
+    private func reserveStateColumn(for item: NSMenuItem) {
+        item.offStateImage = Self.emptyStateImage
     }
 }
 
