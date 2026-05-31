@@ -62,11 +62,14 @@ public final class WhistleAPIClient {
         guard !rule.isGroup else { return }
 
         if rule.isDefault {
-            try await post(path: rule.isSelected ? "/cgi-bin/rules/disable-default" : "/cgi-bin/rules/enable-default")
+            try await post(
+                path: rule.isSelected ? "/cgi-bin/rules/disable-default" : "/cgi-bin/rules/enable-default",
+                form: ["name": rule.name, "value": rule.value]
+            )
         } else {
             try await post(
                 path: rule.isSelected ? "/cgi-bin/rules/unselect" : "/cgi-bin/rules/select",
-                form: ["name": rule.name]
+                form: ["name": rule.name, "value": rule.value]
             )
         }
     }
@@ -173,7 +176,8 @@ public struct RulesListResponse: Decodable, Equatable, Sendable {
             displayName: L10n.string("menu.rules.default"),
             isSelected: !(defaultRulesIsDisabled ?? false),
             isDefault: true,
-            isGroup: false
+            isGroup: false,
+            value: defaultRules ?? ""
         )
 
         let normalItems = list.map { raw in
@@ -185,7 +189,8 @@ public struct RulesListResponse: Decodable, Equatable, Sendable {
                 displayName: displayName,
                 isSelected: raw.selected == true,
                 isDefault: false,
-                isGroup: isGroup
+                isGroup: isGroup,
+                value: raw.data ?? ""
             )
         }
 

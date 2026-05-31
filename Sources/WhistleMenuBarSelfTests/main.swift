@@ -159,9 +159,10 @@ struct WhistleMenuBarSelfTests {
                 displayName: "rule-a",
                 isSelected: false,
                 isDefault: false,
-                isGroup: false
+                isGroup: false,
+                value: "rule-a-content"
             ))
-            try expect(MockHTTP.lastBody == "name=rule-a")
+            try expect(MockHTTP.lastBody == "name=rule-a&value=rule-a-content")
 
             try await client.toggle(RuleItem(
                 id: "rule-a",
@@ -169,9 +170,10 @@ struct WhistleMenuBarSelfTests {
                 displayName: "rule-a",
                 isSelected: true,
                 isDefault: false,
-                isGroup: false
+                isGroup: false,
+                value: "rule-a-content"
             ))
-            try expect(MockHTTP.lastBody == "name=rule-a")
+            try expect(MockHTTP.lastBody == "name=rule-a&value=rule-a-content")
 
             try await client.toggle(RuleItem(
                 id: "__default__",
@@ -179,8 +181,10 @@ struct WhistleMenuBarSelfTests {
                 displayName: "Default Rules",
                 isSelected: true,
                 isDefault: true,
-                isGroup: false
+                isGroup: false,
+                value: "default-content"
             ))
+            try expect(MockHTTP.lastBody == "name=Default&value=default-content")
 
             try await client.toggle(RuleItem(
                 id: "__default__",
@@ -188,8 +192,10 @@ struct WhistleMenuBarSelfTests {
                 displayName: "Default Rules",
                 isSelected: false,
                 isDefault: true,
-                isGroup: false
+                isGroup: false,
+                value: "default-content"
             ))
+            try expect(MockHTTP.lastBody == "name=Default&value=default-content")
 
             try expect(MockHTTP.summary == [
                 "POST /cgi-bin/rules/select",

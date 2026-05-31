@@ -7,6 +7,7 @@ public struct RuleItem: Identifiable, Equatable, Sendable {
     public let isSelected: Bool
     public let isDefault: Bool
     public let isGroup: Bool
+    public let value: String
 
     public init(
         id: String,
@@ -14,7 +15,8 @@ public struct RuleItem: Identifiable, Equatable, Sendable {
         displayName: String,
         isSelected: Bool,
         isDefault: Bool,
-        isGroup: Bool
+        isGroup: Bool,
+        value: String = ""
     ) {
         self.id = id
         self.name = name
@@ -22,5 +24,6 @@ public struct RuleItem: Identifiable, Equatable, Sendable {
         self.isSelected = isSelected
         self.isDefault = isDefault
         self.isGroup = isGroup
+        self.value = value
     }
 }
