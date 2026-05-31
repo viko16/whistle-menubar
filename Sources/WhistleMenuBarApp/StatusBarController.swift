@@ -182,15 +182,25 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     private func configureStatusItem() {
         if let button = statusItem.button {
-            let image = Bundle.module.image(forResource: "StatusBarIconTemplate")
-                ?? Bundle.main.image(forResource: "StatusBarIconTemplate")
-                ?? NSImage(systemSymbolName: "network", accessibilityDescription: "whistle-menubar")
+            let image = statusBarIconImage()
             image?.isTemplate = true
             image?.size = NSSize(width: 18, height: 18)
             button.image = image
             button.imagePosition = .imageOnly
             button.toolTip = "whistle-menubar"
         }
+    }
+
+    // Do not use Bundle.module here: SwiftPM's generated accessor fatalErrors
+    // when the app target resource bundle is missing from a packaged .app.
+    private func statusBarIconImage() -> NSImage? {
+        if let url = Bundle.main.url(forResource: "StatusBarIconTemplate", withExtension: "png"),
+           let image = NSImage(contentsOf: url) {
+            return image
+        }
+
+        return Bundle.main.image(forResource: "StatusBarIconTemplate")
+            ?? NSImage(systemSymbolName: "network", accessibilityDescription: "whistle-menubar")
     }
 
     private func rebuildMenu() {
