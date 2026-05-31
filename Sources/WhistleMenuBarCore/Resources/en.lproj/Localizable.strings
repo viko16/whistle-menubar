@@ -15,7 +15,7 @@
 "menu.rules.multiple_choice_failed" = "Failed to enable multiple Rules";
 "menu.proxy" = "System Proxy";
 "menu.launch_at_login" = "Launch at Login";
-"menu.quit" = "Quit whistle-menubar";
+"menu.quit" = "Quit App";
 "notification.w2.title" = "w2 unavailable";
 "notification.w2.body" = "No usable w2 command was found. Please confirm Whistle is installed.";
 "notification.rules.title" = "Whistle Rules operation failed";

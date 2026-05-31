@@ -15,7 +15,7 @@
 "menu.rules.multiple_choice_failed" = "Rules 多选开启失败";
 "menu.proxy" = "系统代理";
 "menu.launch_at_login" = "开机启动";
-"menu.quit" = "退出 whistle-menubar";
+"menu.quit" = "退出应用";
 "notification.w2.title" = "w2 不可用";
 "notification.w2.body" = "未找到可用的 w2 命令，请确认 Whistle 已正确安装。";
 "notification.rules.title" = "Whistle Rules 操作失败";
