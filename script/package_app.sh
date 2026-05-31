@@ -89,6 +89,7 @@ BINARY_PATH="$BUILD_BIN_DIR/$PRODUCT_NAME"
 /bin/cp "$BINARY_PATH" "$MACOS_DIR/$APP_NAME"
 /bin/chmod +x "$MACOS_DIR/$APP_NAME"
 
+/bin/cp -R "$ROOT_DIR/Sources/WhistleMenuBarApp/Resources/." "$RESOURCES_DIR/"
 /bin/cp -R "$ROOT_DIR/Sources/WhistleMenuBarCore/Resources/zh-Hans.lproj" "$RESOURCES_DIR/"
 /bin/cp -R "$ROOT_DIR/Sources/WhistleMenuBarCore/Resources/en.lproj" "$RESOURCES_DIR/"
 
@@ -112,6 +113,8 @@ done < <(/usr/bin/find "$ROOT_DIR/.build" -maxdepth 8 -type d \( -name 'WhistleM
   <string>$APP_NAME</string>
   <key>CFBundleIdentifier</key>
   <string>$BUNDLE_ID</string>
+  <key>CFBundleIconFile</key>
+  <string>AppIcon</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>

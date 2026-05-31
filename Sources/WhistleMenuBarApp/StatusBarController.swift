@@ -182,9 +182,13 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     private func configureStatusItem() {
         if let button = statusItem.button {
-            let image = NSImage(systemSymbolName: "network", accessibilityDescription: "whistle-menubar")
+            let image = Bundle.module.image(forResource: "StatusBarIconTemplate")
+                ?? Bundle.main.image(forResource: "StatusBarIconTemplate")
+                ?? NSImage(systemSymbolName: "network", accessibilityDescription: "whistle-menubar")
             image?.isTemplate = true
+            image?.size = NSSize(width: 18, height: 18)
             button.image = image
+            button.imagePosition = .imageOnly
             button.toolTip = "whistle-menubar"
         }
     }

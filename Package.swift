@@ -22,7 +22,10 @@ let package = Package(
         ),
         .executableTarget(
             name: "WhistleMenuBarApp",
-            dependencies: ["WhistleMenuBarCore"]
+            dependencies: ["WhistleMenuBarCore"],
+            resources: [
+                .process("Resources")
+            ]
         ),
         .executableTarget(
             name: "WhistleMenuBarSelfTests",
