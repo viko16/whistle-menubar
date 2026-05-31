@@ -10,21 +10,31 @@ public enum L10n {
     }
 
     private static var localizationBundle: Bundle {
-        let candidates: [Bundle?] = [
+        let packagedCandidates: [Bundle?] = [
             Bundle.main,
-            Bundle.module,
             Bundle.main.resourceURL.flatMap {
                 Bundle(url: $0.appendingPathComponent("WhistleMenuBarCore_WhistleMenuBarCore.resources"))
             },
             Bundle.main.resourceURL.flatMap {
                 Bundle(url: $0.appendingPathComponent("WhistleMenuBarCore_WhistleMenuBarCore.bundle"))
+            },
+            Bundle.main.resourceURL.flatMap {
+                Bundle(url: $0.appendingPathComponent("whistle-menubar_WhistleMenuBarCore.bundle"))
             }
         ]
 
+        if let bundle = firstLocalizedBundle(in: packagedCandidates) {
+            return bundle
+        }
+
+        return Bundle.module
+    }
+
+    private static func firstLocalizedBundle(in candidates: [Bundle?]) -> Bundle? {
         return candidates.compactMap { $0 }.first { bundle in
             bundle.path(forResource: "Localizable", ofType: "strings") != nil ||
                 bundle.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: "zh-Hans") != nil ||
                 bundle.path(forResource: "Localizable", ofType: "strings", inDirectory: nil, forLocalization: "en") != nil
-        } ?? .module
+        }
     }
 }

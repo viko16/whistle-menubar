@@ -92,6 +92,11 @@ BINARY_PATH="$BUILD_BIN_DIR/$PRODUCT_NAME"
 /bin/cp -R "$ROOT_DIR/Sources/WhistleMenuBarCore/Resources/zh-Hans.lproj" "$RESOURCES_DIR/"
 /bin/cp -R "$ROOT_DIR/Sources/WhistleMenuBarCore/Resources/en.lproj" "$RESOURCES_DIR/"
 
+SWIFTPM_RESOURCE_BUNDLE="$BUILD_BIN_DIR/${PRODUCT_NAME}_WhistleMenuBarCore.bundle"
+if [[ -d "$SWIFTPM_RESOURCE_BUNDLE" ]]; then
+  /bin/cp -R "$SWIFTPM_RESOURCE_BUNDLE" "$RESOURCES_DIR/"
+fi
+
 while IFS= read -r resource_bundle; do
   /bin/cp -R "$resource_bundle" "$RESOURCES_DIR/"
 done < <(/usr/bin/find "$ROOT_DIR/.build" -maxdepth 8 -type d \( -name 'WhistleMenuBarCore_WhistleMenuBarCore.resources' -o -name 'WhistleMenuBarCore_WhistleMenuBarCore.bundle' \) 2>/dev/null)
