@@ -4,6 +4,7 @@ import WhistleMenuBarCore
 @MainActor
 final class StatusBarController: NSObject, NSMenuDelegate {
     private let statusItem: NSStatusItem
+    private let menu = NSMenu()
     private let menuBuilder = MenuBuilder()
     private let w2CommandService: W2CommandService
     private let systemProxyService: SystemProxyService
@@ -29,6 +30,8 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         self.launchAtLoginService = launchAtLoginService
         self.notificationService = notificationService
         super.init()
+        menu.delegate = self
+        statusItem.menu = menu
         configureStatusItem()
         rebuildMenu()
     }
@@ -204,8 +207,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     }
 
     private func rebuildMenu() {
-        let menu = menuBuilder.build(state: state, target: self)
-        menu.delegate = self
-        statusItem.menu = menu
+        // Keep the attached menu instance so refreshes update the currently open menu.
+        menuBuilder.rebuild(menu, state: state, target: self)
     }
 }

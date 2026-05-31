@@ -3,8 +3,8 @@ import WhistleMenuBarCore
 
 @MainActor
 final class MenuBuilder {
-    func build(state: AppState, target: StatusBarController) -> NSMenu {
-        let menu = NSMenu()
+    func rebuild(_ menu: NSMenu, state: AppState, target: StatusBarController) {
+        menu.removeAllItems()
         menu.autoenablesItems = false
 
         menu.addItem(disabledItem(title: statusTitle(for: state.whistleStatus)))
@@ -24,8 +24,6 @@ final class MenuBuilder {
         addProxy(to: menu, state: state, target: target)
         addLaunchAtLogin(to: menu, state: state, target: target)
         addQuit(to: menu, target: target)
-
-        return menu
     }
 
     private func addRules(to menu: NSMenu, state: AppState, target: StatusBarController) {
