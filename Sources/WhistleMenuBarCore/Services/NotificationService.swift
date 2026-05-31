@@ -1,12 +1,16 @@
-import AppKit
 import Foundation
 import UserNotifications
 
 public final class NotificationService {
     private let center: UNUserNotificationCenter
+    private let unavailableHandler: () -> Void
 
-    public init(center: UNUserNotificationCenter = .current()) {
+    public init(
+        center: UNUserNotificationCenter = .current(),
+        unavailableHandler: @escaping () -> Void = {}
+    ) {
         self.center = center
+        self.unavailableHandler = unavailableHandler
     }
 
     public func requestAuthorization() {
@@ -28,9 +32,10 @@ public final class NotificationService {
     }
 
     public func send(title: String, body: String) {
-        center.getNotificationSettings { [center] settings in
+        let unavailableHandler = unavailableHandler
+        center.getNotificationSettings { [center, unavailableHandler] settings in
             guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else {
-                NSSound.beep()
+                unavailableHandler()
                 return
             }
 

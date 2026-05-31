@@ -10,7 +10,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let commandRunner = ShellCommand()
         let configStore = ConfigStore()
         let locator = W2Locator(configStore: configStore, commandRunner: commandRunner)
-        let notificationService = NotificationService()
+        let notificationService = NotificationService(unavailableHandler: {
+            NSSound.beep()
+        })
         notificationService.requestAuthorization()
 
         statusBarController = StatusBarController(

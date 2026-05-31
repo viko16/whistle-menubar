@@ -41,57 +41,70 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     }
 
     func refreshMenuData() {
+        let token = beginMenuRefresh()
+
+        Task {
+            let refreshData = await loadMenuRefreshData()
+            applyMenuRefresh(refreshData, token: token)
+        }
+    }
+
+    private func beginMenuRefresh() -> UUID {
         let token = UUID()
         refreshToken = token
         state.launchAtLoginEnabled = launchAtLoginService.isEnabled()
         rebuildMenu()
+        return token
+    }
 
-        Task {
-            let whistleStatus = await w2CommandService.getStatus()
-            async let proxyStateTask: ProxyState = whistleStatus.hasUsableW2 ? systemProxyService.currentState() : .unknown
+    private func loadMenuRefreshData() async -> MenuRefreshData {
+        let whistleStatus = await w2CommandService.getStatus()
+        async let proxyStateTask: ProxyState = loadProxyState(
+            hasUsableW2: whistleStatus.hasUsableW2
+        )
+        let rulesRefresh = await loadRulesRefreshData(isRunning: whistleStatus.isRunning)
+        let proxyState = await proxyStateTask
 
-            var loadedRules: [RuleItem] = []
-            var rulesReadFailed = false
-            var multipleChoiceFailed = false
+        return MenuRefreshData(
+            whistleStatus: whistleStatus,
+            proxyState: proxyState,
+            rules: rulesRefresh.rules,
+            rulesReadFailed: rulesRefresh.rulesReadFailed,
+            multipleChoiceFailed: rulesRefresh.multipleChoiceFailed
+        )
+    }
 
-            if whistleStatus.isRunning {
-                do {
-                    let result = try await apiClient.loadRulesEnsuringMultipleChoice()
-                    loadedRules = result.rules
-                    multipleChoiceFailed = result.multipleChoiceFailed
-                } catch {
-                    Log.warn("Rules refresh failed: \(error)")
-                    rulesReadFailed = true
-                }
-            }
+    private func loadProxyState(hasUsableW2: Bool) async -> ProxyState {
+        guard hasUsableW2 else { return .unknown }
+        return await systemProxyService.currentState()
+    }
 
-            let proxyState = await proxyStateTask
+    private func loadRulesRefreshData(isRunning: Bool) async -> RulesRefreshData {
+        guard isRunning else { return RulesRefreshData() }
 
-            await MainActor.run {
-                guard self.refreshToken == token else { return }
-                self.state.whistleStatus = whistleStatus
-                self.state.proxyState = proxyState
-                self.state.launchAtLoginEnabled = self.launchAtLoginService.isEnabled()
-                self.state.rules = loadedRules
-                self.state.rulesLoading = false
-                self.state.rulesReadFailed = rulesReadFailed
-                self.state.multipleChoiceFailed = multipleChoiceFailed
-                self.rebuildMenu()
-
-                if rulesReadFailed {
-                    self.notificationService.send(
-                        titleKey: "notification.rules.title",
-                        bodyKey: "notification.rules.read_body"
-                    )
-                } else if multipleChoiceFailed && !self.didNotifyMultipleChoiceFailure {
-                    self.didNotifyMultipleChoiceFailure = true
-                    self.notificationService.send(
-                        titleKey: "notification.rules.title",
-                        bodyKey: "notification.rules.multiple_choice_body"
-                    )
-                }
-            }
+        do {
+            let result = try await apiClient.loadRulesEnsuringMultipleChoice()
+            return RulesRefreshData(
+                rules: result.rules,
+                multipleChoiceFailed: result.multipleChoiceFailed
+            )
+        } catch {
+            Log.warn("Rules refresh failed: \(error)")
+            return RulesRefreshData(rulesReadFailed: true)
         }
+    }
+
+    private func applyMenuRefresh(_ refreshData: MenuRefreshData, token: UUID) {
+        guard refreshToken == token else { return }
+        state.whistleStatus = refreshData.whistleStatus
+        state.proxyState = refreshData.proxyState
+        state.launchAtLoginEnabled = launchAtLoginService.isEnabled()
+        state.rules = refreshData.rules
+        state.rulesLoading = false
+        state.rulesReadFailed = refreshData.rulesReadFailed
+        state.multipleChoiceFailed = refreshData.multipleChoiceFailed
+        rebuildMenu()
+        notifyRulesRefreshIssueIfNeeded(refreshData)
     }
 
     @objc func openWebUI() {
@@ -112,28 +125,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         rebuildMenu()
 
         Task {
-            do {
-                try await apiClient.toggle(rule)
-                let result = try await apiClient.loadRulesEnsuringMultipleChoice()
-                await MainActor.run {
-                    self.state.rules = result.rules
-                    self.state.rulesLoading = false
-                    self.state.rulesReadFailed = false
-                    self.state.multipleChoiceFailed = result.multipleChoiceFailed
-                    self.rebuildMenu()
-                }
-            } catch {
-                Log.warn("Rules toggle failed for \(rule.name): \(error)")
-                await MainActor.run {
-                    self.state.rulesLoading = false
-                    self.state.rulesReadFailed = true
-                    self.rebuildMenu()
-                    self.notificationService.send(
-                        titleKey: "notification.rules.title",
-                        body: L10n.format("notification.rules.toggle_body_format", rule.displayName)
-                    )
-                }
-            }
+            await toggle(rule)
         }
     }
 
@@ -143,24 +135,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         rebuildMenu()
 
         Task {
-            do {
-                try await w2CommandService.setProxyEnabled(shouldEnable)
-                let refreshed = await systemProxyService.currentState()
-                await MainActor.run {
-                    self.state.proxyState = refreshed
-                    self.rebuildMenu()
-                }
-            } catch {
-                Log.warn("Proxy toggle failed: \(error)")
-                await MainActor.run {
-                    self.state.proxyState = .unknown
-                    self.rebuildMenu()
-                    self.notificationService.send(
-                        titleKey: "notification.proxy.title",
-                        bodyKey: "notification.proxy.body"
-                    )
-                }
-            }
+            await setProxyEnabled(shouldEnable)
         }
     }
 
@@ -171,16 +146,96 @@ final class StatusBarController: NSObject, NSMenuDelegate {
             state.launchAtLoginEnabled = launchAtLoginService.isEnabled()
             rebuildMenu()
         } catch {
-            Log.warn("Launch at login toggle failed: \(error)")
-            notificationService.send(
+            presentFailure(
+                "Launch at login toggle failed: \(error)",
                 titleKey: "notification.launch.title",
-                bodyKey: "notification.launch.body"
+                body: .localizedKey("notification.launch.body")
             )
         }
     }
 
     @objc func quit() {
         NSApp.terminate(nil)
+    }
+
+    private func toggle(_ rule: RuleItem) async {
+        do {
+            try await apiClient.toggle(rule)
+            let result = try await apiClient.loadRulesEnsuringMultipleChoice()
+            applyRulesLoadResult(result)
+        } catch {
+            presentFailure(
+                "Rules toggle failed for \(rule.name): \(error)",
+                titleKey: "notification.rules.title",
+                body: .text(L10n.format(
+                    "notification.rules.toggle_body_format",
+                    rule.displayName
+                ))
+            ) {
+                self.state.rulesLoading = false
+                self.state.rulesReadFailed = true
+            }
+        }
+    }
+
+    private func setProxyEnabled(_ shouldEnable: Bool) async {
+        do {
+            try await w2CommandService.setProxyEnabled(shouldEnable)
+            state.proxyState = await systemProxyService.currentState()
+            rebuildMenu()
+        } catch {
+            presentFailure(
+                "Proxy toggle failed: \(error)",
+                titleKey: "notification.proxy.title",
+                body: .localizedKey("notification.proxy.body")
+            ) {
+                self.state.proxyState = .unknown
+            }
+        }
+    }
+
+    private func applyRulesLoadResult(_ result: RulesLoadResult) {
+        state.rules = result.rules
+        state.rulesLoading = false
+        state.rulesReadFailed = false
+        state.multipleChoiceFailed = result.multipleChoiceFailed
+        rebuildMenu()
+    }
+
+    private func notifyRulesRefreshIssueIfNeeded(_ refreshData: MenuRefreshData) {
+        if refreshData.rulesReadFailed {
+            sendNotification(
+                titleKey: "notification.rules.title",
+                body: .localizedKey("notification.rules.read_body")
+            )
+        } else if refreshData.multipleChoiceFailed && !didNotifyMultipleChoiceFailure {
+            didNotifyMultipleChoiceFailure = true
+            sendNotification(
+                titleKey: "notification.rules.title",
+                body: .localizedKey("notification.rules.multiple_choice_body")
+            )
+        }
+    }
+
+    private func presentFailure(
+        _ logMessage: String,
+        titleKey: String,
+        body: NotificationBody,
+        updateState: () -> Void = {}
+    ) {
+        Log.warn(logMessage)
+        updateState()
+        rebuildMenu()
+        sendNotification(titleKey: titleKey, body: body)
+    }
+
+    private func sendNotification(titleKey: String, body: NotificationBody) {
+        switch body {
+        case .localizedKey(let bodyKey):
+            notificationService.send(titleKey: titleKey, bodyKey: bodyKey)
+        case .text(let body):
+            notificationService.send(titleKey: titleKey, body: body)
+        }
     }
 
     private func configureStatusItem() {
@@ -210,4 +265,23 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         // Keep the attached menu instance so refreshes update the currently open menu.
         menuBuilder.rebuild(menu, state: state, target: self)
     }
+}
+
+private struct MenuRefreshData {
+    let whistleStatus: WhistleStatus
+    let proxyState: ProxyState
+    let rules: [RuleItem]
+    let rulesReadFailed: Bool
+    let multipleChoiceFailed: Bool
+}
+
+private struct RulesRefreshData {
+    var rules: [RuleItem] = []
+    var rulesReadFailed = false
+    var multipleChoiceFailed = false
+}
+
+private enum NotificationBody {
+    case localizedKey(String)
+    case text(String)
 }
