@@ -8,7 +8,7 @@ public struct RulesLoadResult: Equatable, Sendable {
 public enum WhistleAPIError: Error, LocalizedError, Equatable {
     case invalidURL(String)
     case invalidResponse
-    case httpStatus(url: String, status: Int, body: String)
+    case httpStatus(url: String, status: Int)
     case decoding(String)
 
     public var errorDescription: String? {
@@ -17,8 +17,8 @@ public enum WhistleAPIError: Error, LocalizedError, Equatable {
             return "Invalid Whistle API URL: \(path)"
         case .invalidResponse:
             return "Invalid Whistle API response"
-        case .httpStatus(let url, let status, let body):
-            return "Whistle API failed url=\(url) status=\(status) body=\(body.truncatedForLog())"
+        case .httpStatus(let url, let status):
+            return "Whistle API failed url=\(url) status=\(status)"
         case .decoding(let message):
             return "Whistle API decode failed: \(message)"
         }
@@ -85,8 +85,7 @@ public final class WhistleAPIClient {
         guard (200..<300).contains(httpResponse.statusCode) else {
             throw WhistleAPIError.httpStatus(
                 url: request.url?.absoluteString ?? "",
-                status: httpResponse.statusCode,
-                body: String(data: data, encoding: .utf8) ?? ""
+                status: httpResponse.statusCode
             )
         }
 
@@ -110,15 +109,14 @@ public final class WhistleAPIClient {
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpBody = formURLEncoded(form).data(using: .utf8)
 
-        let (data, response) = try await session.data(for: request)
+        let (_, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw WhistleAPIError.invalidResponse
         }
         guard (200..<300).contains(httpResponse.statusCode) else {
             throw WhistleAPIError.httpStatus(
                 url: request.url?.absoluteString ?? "",
-                status: httpResponse.statusCode,
-                body: String(data: data, encoding: .utf8) ?? ""
+                status: httpResponse.statusCode
             )
         }
     }

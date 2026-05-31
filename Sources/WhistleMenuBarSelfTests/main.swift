@@ -206,6 +206,31 @@ struct WhistleMenuBarSelfTests {
         }
         passed += 1
 
+        try await run("rules API HTTP errors omit response body") {
+            let sensitiveBody = "token=secret-token&rule=internal.example.com"
+            let session = makeMockSession { request in
+                MockHTTP.record(request)
+                return .failure(status: 500, body: sensitiveBody)
+            }
+            let client = WhistleAPIClient(session: session)
+
+            do {
+                _ = try await client.fetchRulesList()
+                throw TestFailure("expected HTTP status failure")
+            } catch let error as WhistleAPIError {
+                let diagnostic = String(describing: error)
+                let localized = error.localizedDescription
+
+                try expect(diagnostic.contains("status: 500"))
+                try expect(localized.contains("status=500"))
+                try expect(!diagnostic.contains(sensitiveBody))
+                try expect(!localized.contains(sensitiveBody))
+                try expect(!diagnostic.contains("secret-token"))
+                try expect(!localized.contains("secret-token"))
+            }
+        }
+        passed += 1
+
         try await run("default rules disabled flag") {
             let response = RulesListResponse(
                 ec: 0,
@@ -393,6 +418,10 @@ enum MockHTTP {
                 body: Data(text.utf8),
                 headers: ["Content-Type": "application/json"]
             )
+        }
+
+        static func failure(status: Int, body: String) -> Response {
+            Response(statusCode: status, body: Data(body.utf8), headers: [:])
         }
     }
 
