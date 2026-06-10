@@ -32,13 +32,13 @@ jobs:
           mkdir -p dist/release
           ditto -c -k --keepParent \
             dist/whistle-menubar.app \
-            "dist/release/whistle-menubar-${{ github.ref_name }}-macos-arm64.zip"
+            "dist/release/whistle-menubar-${{ github.ref_name }}-macos-${{ runner.arch }}.zip"
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v7
         with:
-          name: whistle-menubar-${{ github.ref_name }}-macos-arm64
-          path: dist/release/whistle-menubar-${{ github.ref_name }}-macos-arm64.zip
+          name: whistle-menubar-${{ github.ref_name }}-macos-${{ runner.arch }}
+          path: dist/release/whistle-menubar-${{ github.ref_name }}-macos-${{ runner.arch }}.zip
           archive: false
           if-no-files-found: error
 
@@ -46,7 +46,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ github.ref_name }}
-          ZIP_PATH: dist/release/whistle-menubar-${{ github.ref_name }}-macos-arm64.zip
+          ZIP_PATH: dist/release/whistle-menubar-${{ github.ref_name }}-macos-${{ runner.arch }}.zip
         run: |
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             gh release upload "$TAG_NAME" "$ZIP_PATH" --clobber
