@@ -11,6 +11,17 @@ final class MenuBuilder {
 
         menu.addItem(disabledItem(title: statusTitle(for: state.whistleStatus)))
 
+        if state.whistleStatus == .stopped {
+            let startWhistle = NSMenuItem(
+                title: L10n.string("menu.start_whistle"),
+                action: #selector(StatusBarController.startWhistle),
+                keyEquivalent: ""
+            )
+            startWhistle.target = target
+            startWhistle.isEnabled = true
+            menu.addItem(startWhistle)
+        }
+
         let openWebUI = NSMenuItem(
             title: L10n.string("menu.open_webui"),
             action: #selector(StatusBarController.openWebUI),
