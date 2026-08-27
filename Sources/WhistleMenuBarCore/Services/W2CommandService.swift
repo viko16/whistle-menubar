@@ -46,6 +46,22 @@ public final class W2CommandService {
         }
     }
 
+    public func restart() async throws {
+        guard let w2Path = await locator.locate() else {
+            throw W2CommandError.unavailable
+        }
+
+        let result = try await commandRunner.run(
+            executable: w2Path,
+            arguments: ["restart"],
+            timeout: 10,
+            environment: nil
+        )
+        guard result.exitCode == 0 else {
+            throw W2CommandError.failed(result)
+        }
+    }
+
     public func setProxyEnabled(_ enabled: Bool) async throws {
         guard let w2Path = await locator.locate() else {
             throw W2CommandError.unavailable
