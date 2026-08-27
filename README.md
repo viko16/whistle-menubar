@@ -13,6 +13,7 @@ Whistle Menubar 不显示 Dock 图标或主窗口。它只和本机 `127.0.0.1:8
 ## 功能
 
 - 菜单栏常驻，展示 Whistle 当前状态。
+- Whistle 停止时可通过菜单执行 `w2 restart` 启动服务。
 - 打开默认 WebUI：`http://127.0.0.1:8899`。
 - 读取 Whistle Rules CGI，展示 Default Rules 和普通 Rules。
 - 自动开启 Whistle Rules 多选模式。
@@ -83,6 +84,6 @@ SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./script/package_ap
 - 应用不会连接外部服务，也不会上传数据。
 - 应用会访问本机 `http://127.0.0.1:8899` 的 Whistle Rules CGI。
 - 切换 Rules 时，应用会把对应 Rule 名称和值提交给本机 Whistle CGI。
-- 应用会运行 `w2 status`、`w2 proxy`、`w2 proxy 0` 和 `scutil --proxy`。
+- 应用会运行 `w2 status`、`w2 restart`、`w2 proxy`、`w2 proxy 0` 和 `scutil --proxy`。
 - 应用会请求系统通知权限，用于展示操作失败提示。
 - 开机启动通过 macOS `SMAppService.mainApp` 注册或取消。
