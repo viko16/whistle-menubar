@@ -1,4 +1,5 @@
 "menu.open_webui" = "打开 WebUI";
+"menu.start_whistle" = "启动 Whistle";
 "menu.status.checking" = "Whistle：检查中…";
 "menu.status.w2_unavailable" = "Whistle：未找到 w2";
 "menu.status.running" = "Whistle：运行中";
@@ -18,6 +19,8 @@
 "menu.quit" = "退出应用";
 "notification.w2.title" = "w2 不可用";
 "notification.w2.body" = "未找到可用的 w2 命令，请确认 Whistle 已正确安装。";
+"notification.start_whistle.title" = "启动 Whistle 失败";
+"notification.start_whistle.body" = "无法通过 w2 启动 Whistle，请检查 Whistle 安装后重试。";
 "notification.rules.title" = "Whistle Rules 操作失败";
 "notification.rules.read_body" = "无法读取 Rules，请确认 Whistle 正在运行。";
 "notification.rules.toggle_body_format" = "无法切换「%@」，请确认 Whistle 正在运行。";
