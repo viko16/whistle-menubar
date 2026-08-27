@@ -4,6 +4,8 @@
 
 一个 macOS 菜单栏常驻小工具，用于快速查看和操作本机默认 Whistle 实例。
 
+这是一个非官方项目，与 Whistle 官方项目无隶属关系。Whistle 项目见 [avwo/whistle](https://github.com/avwo/whistle)。
+
 Whistle Menubar 不显示 Dock 图标或主窗口。它只和本机 `127.0.0.1:8899` 上的 Whistle WebUI、`w2` 命令以及 macOS 系统代理设置交互。
 
 <p align="center">
@@ -31,7 +33,7 @@ Whistle Menubar 不显示 Dock 图标或主窗口。它只和本机 `127.0.0.1:8
 3. 从 [GitHub Releases](https://github.com/viko16/whistle-menubar/releases) 下载最新的 macOS zip。
 4. 解压后将 `whistle-menubar.app` 拖到 `Applications` 或其他你习惯的位置。
 
-Release zip 的架构后缀来自 GitHub Actions runner，例如 `macos-ARM64` 或 `macos-X64`。当前发布流程打包的是 runner 当前架构，不生成 universal binary。
+GitHub Releases 当前仅提供 Apple Silicon（arm64）构建，不提供 Intel（x86_64）或 universal binary。
 
 默认发布包使用 ad-hoc codesign。它能保证 bundle 签名结构完整，但不是 Developer ID 签名或公证包。如果 macOS Gatekeeper 阻止首次打开，可以右键应用选择“打开”，或从源码自行构建。
 
