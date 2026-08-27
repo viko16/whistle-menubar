@@ -6,6 +6,10 @@
 
 Whistle Menubar 不显示 Dock 图标或主窗口。它只和本机 `127.0.0.1:8899` 上的 Whistle WebUI、`w2` 命令以及 macOS 系统代理设置交互。
 
+<p align="center">
+  <img src=".github/assets/menu.png" alt="Whistle Menubar 菜单截图" width="436">
+</p>
+
 ## 功能
 
 - 菜单栏常驻，展示 Whistle 当前状态。
