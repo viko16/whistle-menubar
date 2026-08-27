@@ -115,6 +115,17 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         NSWorkspace.shared.open(URL(string: "http://127.0.0.1:8899")!)
     }
 
+    @objc func startWhistle() {
+        guard state.whistleStatus == .stopped else { return }
+
+        state.whistleStatus = .checking
+        rebuildMenu()
+
+        Task {
+            await restartWhistle()
+        }
+    }
+
     @objc func toggleRule(_ sender: NSMenuItem) {
         guard let payload = sender.representedObject as? RuleMenuPayload else { return }
         let rule = payload.rule
@@ -156,6 +167,21 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     @objc func quit() {
         NSApp.terminate(nil)
+    }
+
+    private func restartWhistle() async {
+        do {
+            try await w2CommandService.restart()
+            refreshMenuData()
+        } catch {
+            presentFailure(
+                "Whistle restart failed: \(error)",
+                titleKey: "notification.start_whistle.title",
+                body: .localizedKey("notification.start_whistle.body")
+            ) {
+                self.state.whistleStatus = .stopped
+            }
+        }
     }
 
     private func toggle(_ rule: RuleItem) async {
