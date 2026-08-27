@@ -5,6 +5,7 @@
 - SwiftPM macOS menu bar app. The runnable app is packaged manually into `dist/whistle-menubar.app`.
 - Use `./script/test.sh` for tests, `./script/package_app.sh` for packaging, and `./script/run_app.sh` for local launch.
 - `script/build_and_run.sh` is only a compatibility entrypoint and does not launch the app.
+- Keep `README.md` concise and user-facing. Put packaging details, implementation notes, and maintenance pitfalls in `AGENTS.md` instead.
 
 ## Resource Packaging Pitfalls
 
@@ -15,6 +16,7 @@
 
 ## Release Checks
 
+- Releases are triggered by `v*` tags (for example `v0.4.0`) and currently publish Apple Silicon / arm64 builds only.
 - Do not trust a local `dist` launch alone. Temporarily hide `.build/arm64-apple-macosx/release/whistle-menubar_WhistleMenuBarApp.bundle`, open `dist/whistle-menubar.app`, and confirm the process stays alive.
 - Release artifacts are currently ad-hoc signed by default (`SIGN_IDENTITY=-`). Gatekeeper/manual allow behavior is separate from startup crashes.
 - Regenerate icon outputs with `./script/generate_icons.sh` when SVG sources change, and keep the generated PNG/ICNS committed.
