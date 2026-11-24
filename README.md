@@ -20,11 +20,13 @@
 
 需要 macOS 14+、Apple Silicon，以及已安装并配置好的 Whistle。
 
-1. 从 [Releases](https://github.com/viko16/whistle-menubar/releases) 下载最新版
-2. 解压并将 `whistle-menubar.app` 放入 `Applications`
-3. 启动即可
+用 Homebrew 安装后，在「应用程序」中打开 Whistle Menubar：
 
-Release 使用 ad-hoc 签名。如果 macOS 阻止首次运行，请右键 App → **打开**。
+```sh
+brew install --cask viko16/tap/whistle-menubar
+```
+
+也可以从 [Releases](https://github.com/viko16/whistle-menubar/releases) 下载 ZIP，解压后将 `whistle-menubar.app` 拖到「应用程序」。应用使用 ad-hoc 签名，首次启动若被 macOS 拦截，可在「系统设置 → 隐私与安全性」中选择「仍要打开」。
 
 ## 开发
 
